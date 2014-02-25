@@ -22,6 +22,7 @@
 #define OS_WINDOWS_H_
 
 #include "libvmi.h"
+#include "libvmi_extra.h"
 
 struct windows_instance {
     addr_t ntoskrnl; /**< phys address for ntoskrnl image */
@@ -41,6 +42,8 @@ struct windows_instance {
     uint64_t kpcr_offset; /**< KiInitialPCR (ntoskrnl + offset) */
 
     uint64_t kdbg_offset; /**< KdDebuggerDataBlock (ntoskrnl + offset) */
+
+    KDDEBUGGER_DATA64 *kdbg; /**< KdDebuggerDataBlock */
 
     uint64_t pname_offset; /**< EPROCESS->ImageFileName */
 

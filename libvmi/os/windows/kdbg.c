@@ -31,148 +31,6 @@
 #define _GNU_SOURCE
 #include <string.h>
 
-struct _DBGKD_DEBUG_DATA_HEADER64 {
-    uint64_t List[2];
-    uint32_t OwnerTag;
-    uint32_t Size;
-} __attribute__ ((packed));
-typedef struct _DBGKD_DEBUG_DATA_HEADER64 DBGKD_DEBUG_DATA_HEADER64;
-
-struct _KDDEBUGGER_DATA64 {
-    DBGKD_DEBUG_DATA_HEADER64 Header;
-    uint64_t KernBase;
-    uint64_t BreakpointWithStatus;
-    uint64_t SavedContext;
-    uint16_t ThCallbackStack;
-    uint16_t NextCallback;
-    uint16_t FramePointer;
-    uint16_t PaeEnabled;
-    uint64_t KiCallUserMode;
-    uint64_t KeUserCallbackDispatcher;
-    uint64_t PsLoadedModuleList;
-    uint64_t PsActiveProcessHead;
-    uint64_t PspCidTable;
-    uint64_t ExpSystemResourcesList;
-    uint64_t ExpPagedPoolDescriptor;
-    uint64_t ExpNumberOfPagedPools;
-    uint64_t KeTimeIncrement;
-    uint64_t KeBugCheckCallbackListHead;
-    uint64_t KiBugcheckData;
-    uint64_t IopErrorLogListHead;
-    uint64_t ObpRootDirectoryObject;
-    uint64_t ObpTypeObjectType;
-    uint64_t MmSystemCacheStart;
-    uint64_t MmSystemCacheEnd;
-    uint64_t MmSystemCacheWs;
-    uint64_t MmPfnDatabase;
-    uint64_t MmSystemPtesStart;
-    uint64_t MmSystemPtesEnd;
-    uint64_t MmSubsectionBase;
-    uint64_t MmNumberOfPagingFiles;
-    uint64_t MmLowestPhysicalPage;
-    uint64_t MmHighestPhysicalPage;
-    uint64_t MmNumberOfPhysicalPages;
-    uint64_t MmMaximumNonPagedPoolInBytes;
-    uint64_t MmNonPagedSystemStart;
-    uint64_t MmNonPagedPoolStart;
-    uint64_t MmNonPagedPoolEnd;
-    uint64_t MmPagedPoolStart;
-    uint64_t MmPagedPoolEnd;
-    uint64_t MmPagedPoolInformation;
-    uint64_t MmPageSize;
-    uint64_t MmSizeOfPagedPoolInBytes;
-    uint64_t MmTotalCommitLimit;
-    uint64_t MmTotalCommittedPages;
-    uint64_t MmSharedCommit;
-    uint64_t MmDriverCommit;
-    uint64_t MmProcessCommit;
-    uint64_t MmPagedPoolCommit;
-    uint64_t MmExtendedCommit;
-    uint64_t MmZeroedPageListHead;
-    uint64_t MmFreePageListHead;
-    uint64_t MmStandbyPageListHead;
-    uint64_t MmModifiedPageListHead;
-    uint64_t MmModifiedNoWritePageListHead;
-    uint64_t MmAvailablePages;
-    uint64_t MmResidentAvailablePages;
-    uint64_t PoolTrackTable;
-    uint64_t NonPagedPoolDescriptor;
-    uint64_t MmHighestUserAddress;
-    uint64_t MmSystemRangeStart;
-    uint64_t MmUserProbeAddress;
-    uint64_t KdPrintCircularBuffer;
-    uint64_t KdPrintCircularBufferEnd;
-    uint64_t KdPrintWritePointer;
-    uint64_t KdPrintRolloverCount;
-    uint64_t MmLoadedUserImageList;
-    uint64_t NtBuildLab;
-    uint64_t KiNormalSystemCall;
-    uint64_t KiProcessorBlock;
-    uint64_t MmUnloadedDrivers;
-    uint64_t MmLastUnloadedDriver;
-    uint64_t MmTriageActionTaken;
-    uint64_t MmSpecialPoolTag;
-    uint64_t KernelVerifier;
-    uint64_t MmVerifierData;
-    uint64_t MmAllocatedNonPagedPool;
-    uint64_t MmPeakCommitment;
-    uint64_t MmTotalCommitLimitMaximum;
-    uint64_t CmNtCSDVersion;
-    uint64_t MmPhysicalMemoryBlock;
-    uint64_t MmSessionBase;
-    uint64_t MmSessionSize;
-    uint64_t MmSystemParentTablePage;
-    uint64_t MmVirtualTranslationBase;
-    uint16_t OffsetKThreadNextProcessor;
-    uint16_t OffsetKThreadTeb;
-    uint16_t OffsetKThreadKernelStack;
-    uint16_t OffsetKThreadInitialStack;
-    uint16_t OffsetKThreadApcProcess;
-    uint16_t OffsetKThreadState;
-    uint16_t OffsetKThreadBStore;
-    uint16_t OffsetKThreadBStoreLimit;
-    uint16_t SizeEProcess;
-    uint16_t OffsetEprocessPeb;
-    uint16_t OffsetEprocessParentCID;
-    uint16_t OffsetEprocessDirectoryTableBase;
-    uint16_t SizePrcb;
-    uint16_t OffsetPrcbDpcRoutine;
-    uint16_t OffsetPrcbCurrentThread;
-    uint16_t OffsetPrcbMhz;
-    uint16_t OffsetPrcbCpuType;
-    uint16_t OffsetPrcbVendorString;
-    uint16_t OffsetPrcbProcStateContext;
-    uint16_t OffsetPrcbNumber;
-    uint16_t SizeEThread;
-    uint64_t KdPrintCircularBufferPtr;
-    uint64_t KdPrintBufferSize;
-    uint64_t KeLoaderBlock;
-    uint16_t SizePcr;
-    uint16_t OffsetPcrSelfPcr;
-    uint16_t OffsetPcrCurrentPrcb;
-    uint16_t OffsetPcrContainedPrcb;
-    uint16_t OffsetPcrInitialBStore;
-    uint16_t OffsetPcrBStoreLimit;
-    uint16_t OffsetPcrInitialStack;
-    uint16_t OffsetPcrStackLimit;
-    uint16_t OffsetPrcbPcrPage;
-    uint16_t OffsetPrcbProcStateSpecialReg;
-    uint16_t GdtR0Code;
-    uint16_t GdtR0Data;
-    uint16_t GdtR0Pcr;
-    uint16_t GdtR3Code;
-    uint16_t GdtR3Data;
-    uint16_t GdtR3Teb;
-    uint16_t GdtLdt;
-    uint16_t GdtTss;
-    uint16_t Gdt64R3CmCode;
-    uint16_t Gdt64R3CmTeb;
-    uint64_t IopNumTriageDumpDataBlocks;
-    uint64_t IopTriageDumpDataBlocks;
-    uint64_t VfCrashDataBlock;
-} __attribute__ ((packed));
-typedef struct _KDDEBUGGER_DATA64 KDDEBUGGER_DATA64;
-
 static status_t
 kdbg_symbol_resolve(
     vmi_instance_t vmi,
@@ -188,6 +46,12 @@ kdbg_symbol_resolve(
     }
 
     windows = vmi->os_data;
+
+    if(windows->kdbg) {
+        *address = *((unsigned long *)windows->kdbg + offset);
+        return VMI_SUCCESS;
+    }
+
     symaddr = windows->kdbg_va + offset;
 
     if (VMI_FAILURE == vmi_read_64_va(vmi, symaddr, 0, &tmp)) {
@@ -736,38 +600,35 @@ find_windows_version(
         return windows->version;
     }
 
-    uint16_t size = 0;
+    uint16_t signature = 0;
 
-    vmi_read_16_pa(vmi, kdbg + 0x14, &size);
+    vmi_read_16_pa(vmi, kdbg + 0x14, &signature);
 
-    if (memcmp(&size, "\x08\x02", 2) == 0) {
-        dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 2000\n");
-        return VMI_OS_WINDOWS_2000;
+    switch(signature) {
+        case VMI_WINDOWS_2000_SIGNATURE:
+            dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 2000\n");
+            return VMI_OS_WINDOWS_2000;
+        case VMI_WINDOWS_XP_SIGNATURE:
+            dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows XP\n");
+            return VMI_OS_WINDOWS_XP;
+        case VMI_WINDOWS_2003_SIGNATURE:
+            dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 2003\n");
+            return VMI_OS_WINDOWS_2003;
+        case VMI_WINDOWS_VISTA_SIGNATURE:
+            dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows Vista\n");
+            return VMI_OS_WINDOWS_VISTA;
+        case VMI_WINDOWS_2008_SIGNATURE:
+            dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 2008\n");
+            return VMI_OS_WINDOWS_2008;
+        case VMI_WINDOWS_7_SIGNATURE:
+            dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 7\n");
+            return VMI_OS_WINDOWS_7;
+        default:
+            dbprint(VMI_DEBUG_MISC, "--OS Guess: Unknown (0x%.4x)\n", signature);
+            break;
     }
-    else if (memcmp(&size, "\x90\x02", 2) == 0) {
-        dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows XP\n");
-        return VMI_OS_WINDOWS_XP;
-    }
-    else if (memcmp(&size, "\x18\x03", 2) == 0) {
-        dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 2003\n");
-        return VMI_OS_WINDOWS_2003;
-    }
-    else if (memcmp(&size, "\x28\x03", 2) == 0) {
-        dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows Vista\n");
-        return VMI_OS_WINDOWS_VISTA;
-    }
-    else if (memcmp(&size, "\x30\x03", 2) == 0) {
-        dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 2008\n");
-        return VMI_OS_WINDOWS_2008;
-    }
-    else if (memcmp(&size, "\x40\x03", 2) == 0) {
-        dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 7\n");
-        return VMI_OS_WINDOWS_7;
-    }
-    else {
-        dbprint(VMI_DEBUG_MISC, "--OS Guess: Unknown (0x%.4x)\n", size);
-        return VMI_OS_WINDOWS_UNKNOWN;
-    }
+
+    return VMI_OS_WINDOWS_UNKNOWN;
 }
 
 status_t find_kdbg_address(
