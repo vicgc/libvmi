@@ -47,6 +47,7 @@ main(
     memset(zeros, 0, PAGE_SIZE);
     uint32_t offset = 0;
     addr_t address = 0;
+    addr_t size = 0;
 
     /* this is the VM or file that we are looking at */
     char *name = argv[1];
@@ -55,7 +56,7 @@ main(
     filename = strndup(argv[2], 50);
 
     /* initialize the libvmi library */
-    if (vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, name) ==
+    if (vmi_init(&vmi, VMI_AUTO | VMI_INIT_PARTIAL, name) ==
         VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         goto error_exit;
@@ -67,7 +68,15 @@ main(
         goto error_exit;
     }
 
-    while (address < vmi_get_memsize(vmi)) {
+    size = vmi_get_memsize(vmi);
+
+#ifdef ARM
+#define GUEST_RAM_BASE 0x80000000UL;
+    address += GUEST_RAM_BASE;
+    size += GUEST_RAM_BASE;
+#endif
+
+    while (address < size) {
 
         /* write memory to file */
         if (PAGE_SIZE == vmi_read_pa(vmi, address, memory, PAGE_SIZE)) {

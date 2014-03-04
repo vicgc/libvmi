@@ -165,6 +165,8 @@ status_t xen_set_domain_debug_control(
     vmi_instance_t vmi,
     unsigned long vcpu,
     int enable);
+status_t xen_discover_guest_addr_width(
+    vmi_instance_t vmi);
 #if ENABLE_SHM_SNAPSHOT == 1
 status_t xen_create_shm_snapshot(
     vmi_instance_t vmi);

@@ -2,6 +2,12 @@
  * memory in a target virtual machine or in a file containing a dump of
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
  *
+ * Copyright 2011 Sandia Corporation. Under the terms of Contract
+ * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
+ * retains certain rights in this software.
+ *
+ * Author: Tamas K Lengyel (tamas.k.lengyel@tum.de)
+ *
  * This file is part of LibVMI.
  *
  * LibVMI is free software: you can redistribute it and/or modify it under
@@ -18,42 +24,11 @@
  * along with LibVMI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef ARM_H
+#define ARM_H
+
 #include "libvmi.h"
-#include "private.h"
-#include "arch_interface.h"
-#include "intel.h"
-#include "amd64.h"
-#include <stdlib.h>
 
-status_t arch_init(vmi_instance_t vmi) {
+status_t arm_init(vmi_instance_t vmi);
 
-    status_t ret = VMI_FAILURE;
-
-    if (vmi->arch_interface != NULL) {
-        dbprint(VMI_DEBUG_CORE, "Resetting architecture interface");
-        bzero(vmi->arch_interface, sizeof(struct arch_interface));
-    }
-
-    if(vmi->page_mode == VMI_PM_UNKNOWN) {
-        if(VMI_FAILURE == find_page_mode_live(vmi)) {
-            return ret;
-        }
-    }
-
-    switch (vmi->page_mode) {
-        case VMI_PM_LEGACY:
-        case VMI_PM_PAE:
-            ret = intel_init(vmi);
-            break;
-        case VMI_PM_IA32E:
-            ret = amd64_init(vmi);
-            break;
-        case VMI_PM_ARM:
-            ret = arm_init(vmi);
-            break;
-        default:
-            break;
-    }
-
-    return ret;
-}
+#endif

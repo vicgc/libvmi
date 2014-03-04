@@ -16,6 +16,7 @@ c_sources = \
     arch/arch_interface.c \
     arch/intel.c \
     arch/amd64.c \
+    arch/arm.c \
     driver/file.c \
     driver/interface.c \
     driver/kvm.c \

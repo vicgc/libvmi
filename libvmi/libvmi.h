@@ -53,10 +53,10 @@ extern "C" {
 #include <string.h>
 
 /* enable or disable the address cache (v2p, pid, etc) */
-#define ENABLE_ADDRESS_CACHE 1
+#define ENABLE_ADDRESS_CACHE 0
 
 /* enable or disable the page cache */
-#define ENABLE_PAGE_CACHE 1
+#define ENABLE_PAGE_CACHE 0
 
 /* max number of pages held in page cache */
 #define MAX_PAGE_CACHE_SIZE 512
@@ -130,25 +130,36 @@ typedef enum page_mode {
 
     VMI_PM_PAE,     /**< PAE paging */
 
-    VMI_PM_IA32E    /**< IA-32e paging */
+    VMI_PM_IA32E,   /**< IA-32e paging */
+
+    VMI_PM_ARM      /**< ARM paging */
 } page_mode_t;
 
 typedef enum page_size {
 
-    VMI_PS_UNKNOWN = 0ULL, /**< page size unknown */
+    VMI_PS_UNKNOWN  = 0ULL, /**< page size unknown */
 
-    VMI_PS_4KB = 0x1000ULL, /**< 4Kb */
+    VMI_PS_1KB      = 0x400ULL, /**< 1Kb */
 
-    VMI_PS_2MB = 0x200000ULL, /**< 2Mb */
+    VMI_PS_4KB      = 0x1000ULL, /**< 4Kb */
 
-    VMI_PS_4MB = 0x400000ULL, /**< 4Mb */
+    VMI_PS_64KB     = 0x10000ULL, /**< 64Kb */
 
-    VMI_PS_1GB = 0x4000000ULL /**< 1Gb */
+    VMI_PS_1MB      = 0x100000ULL, /**< 1Mb */
+
+    VMI_PS_2MB      = 0x200000ULL, /**< 2Mb */
+
+    VMI_PS_4MB      = 0x400000ULL, /**< 4Mb */
+
+    VMI_PS_16MB     = 0x1000000ULL, /**< 16Mb */
+
+    VMI_PS_1GB      = 0x4000000ULL /**< 1GGb */
 
 } page_size_t;
 
 typedef uint64_t reg_t;
 typedef enum registers {
+    //x86* registers
     RAX,
     RBX,
     RCX,
@@ -240,7 +251,61 @@ typedef enum registers {
      */
     MSR_ALL,
 
-    TSC
+    TSC,
+
+    // ARM32 Registers
+    SCTLR,
+
+    TTBCR,
+    TTBR0,
+    TTBR1,
+
+    R0_USR,
+    R1_USR,
+    R2_USR,
+    R3_USR,
+    R4_USR,
+    R5_USR,
+    R6_USR,
+    R7_USR,
+    R8_USR,
+    R9_USR,
+    R10_USR,
+    R11_USR,
+    R12_USR,
+
+    SP_USR,
+    LR_USR,
+
+    LR_IRQ,
+    SP_IRQ,
+
+    LR_SVC,
+    SP_SVC,
+
+    LR_ABT,
+    SP_ABT,
+
+    LR_UND,
+    SP_UND,
+
+    R8_FIQ,
+    R9_FIQ,
+    R10_FIQ,
+    R11_FIQ,
+    R12_FIQ,
+
+    SP_FIQ,
+    LR_FIQ,
+
+    PC32,
+
+    SPSR_SVC,
+
+    SPSR_FIQ,
+    SPSR_IRQ,
+    SPSR_UND,
+    SPSR_ABT
 } registers_t;
 
 /* type def for forward compatibility with 64-bit guests */
@@ -255,15 +320,15 @@ typedef struct page_info {
     addr_t dtb;         // dtb used for translation
     addr_t paddr;       // physical address
     page_size_t size;   // page size (VMI_PS_*)
-                 //                      NOPAE  PAE    IA32E
-    addr_t l1_a; // the location of the   pte / pte  / pte
-    addr_t l1_v; // the location of the   pte / pte  / pte
-    addr_t l2_a; // the location of the   pgd / pgd  / pde
-    addr_t l2_v; // the value of the      pgd / pgd  / pde
-    addr_t l3_a; // the location of the    -  / pdpe / pdpte
-    addr_t l3_v; // the value of the       -  / pdpe / pdpte
-    addr_t l4_a; // the location of the    -  /  -   / pml4e
-    addr_t l4_v; // the value of the       -  /  -   / pml4e
+                 //                      NOPAE  PAE    IA32E / ARM
+    addr_t l1_a; // the location of the   pte / pte  / pte   / l1
+    addr_t l1_v; // the value of the      pte / pte  / pte   / l1
+    addr_t l2_a; // the location of the   pgd / pgd  / pde   / l2
+    addr_t l2_v; // the value of the      pgd / pgd  / pde   / l2
+    addr_t l3_a; // the location of the    -  / pdpe / pdpte / -
+    addr_t l3_v; // the value of the       -  / pdpe / pdpte / -
+    addr_t l4_a; // the location of the    -  /  -   / pml4e / -
+    addr_t l4_v; // the value of the       -  /  -   / pml4e / -
 } page_info_t;
 
 /**

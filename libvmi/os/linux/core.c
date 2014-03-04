@@ -82,7 +82,13 @@ status_t linux_init(vmi_instance_t vmi) {
     linux_instance->kernel_boundary = boundary;
     dbprint(VMI_DEBUG_MISC, "--got kernel boundary (0x%.16"PRIx64").\n", boundary);
 
-    if(VMI_FAILURE == driver_get_vcpureg(vmi, &vmi->kpgd, CR3, 0)) {
+#if defined(ARM)
+    status_t rc = driver_get_vcpureg(vmi, &vmi->kpgd, TTBR1, 0);
+#elif defined(I386) || defined(X86_64)
+    status_t rc = driver_get_vcpureg(vmi, &vmi->kpgd, CR3, 0);
+#endif
+
+    if(VMI_FAILURE == rc) {
         if (VMI_FAILURE == linux_system_map_symbol_to_address(vmi, "swapper_pg_dir", NULL, &vmi->kpgd)) {
             goto _exit;
         }
@@ -119,7 +125,7 @@ status_t linux_init(vmi_instance_t vmi) {
     }
 
     if(!vmi_pagetable_lookup(vmi, vmi->kpgd, vmi->init_task)) {
-        errprint("Failed to translate init_task VA using the kpgd!\n");
+        errprint("Failed to translate init_task VA (0x%.16"PRIx64") using the kpgd!\n", vmi->init_task);
         goto _exit;
     }
 
