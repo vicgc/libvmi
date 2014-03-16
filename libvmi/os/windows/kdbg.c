@@ -600,9 +600,13 @@ find_windows_version(
         return windows->version;
     }
 
-    uint16_t signature = 0;
+    kdbg_signature_t signature = 0;
 
-    vmi_read_16_pa(vmi, kdbg + 0x14, &signature);
+    if(windows->kdbg) {
+        signature = *((kdbg_signature_t *)windows->kdbg + 0x14);
+    } else {
+        vmi_read_16_pa(vmi, kdbg + 0x14, (uint16_t *)&signature);
+    }
 
     switch(signature) {
         case VMI_WINDOWS_2000_SIGNATURE:
@@ -1079,6 +1083,12 @@ init_kdbg(
         if(!windows->kdbg_va) {
             windows->kdbg_va = windows->ntoskrnl_va + windows->kdbg_offset;
         }
+        ret = VMI_SUCCESS;
+        goto exit;
+    } else
+    if(windows->kdbg) {
+        windows->ntoskrnl = vmi_translate_kv2p(vmi, windows->kdbg->KernBase);
+        windows->ntoskrnl_va = windows->kdbg->KernBase;
         ret = VMI_SUCCESS;
         goto exit;
     }

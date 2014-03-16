@@ -61,9 +61,9 @@ typedef struct __attribute__ ((__packed__)) {
         union {
             uint32_t Size;
             struct __attribute__ ((__packed__)) {
-                kdbg_signature_t signiture;
+                kdbg_signature_t v;
                 uint16_t __unused;
-            };
+            } signature;
         };
     } Header;
     uint64_t KernBase;
