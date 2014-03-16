@@ -623,6 +623,9 @@ find_windows_version(
         case VMI_WINDOWS_7_SIGNATURE:
             dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 7\n");
             return VMI_OS_WINDOWS_7;
+        case VMI_WINDOWS_8_SIGNATURE:
+            dbprint(VMI_DEBUG_MISC, "--OS Guess: Windows 8\n");
+            return VMI_OS_WINDOWS_8;
         default:
             dbprint(VMI_DEBUG_MISC, "--OS Guess: Unknown (0x%.4x)\n", signature);
             break;
