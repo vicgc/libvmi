@@ -26,6 +26,7 @@ c_sources = \
     os/windows/core.c \
     os/windows/kdbg.c \
     os/windows/memory.c \
+    os/windows/symbols.c \
     os/windows/peparse.c \
     os/windows/process.c
 

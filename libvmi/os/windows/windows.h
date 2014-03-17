@@ -25,7 +25,10 @@
 #include "libvmi_extra.h"
 
 struct windows_instance {
-    addr_t ntoskrnl; /**< phys address for ntoskrnl image */
+
+    char *sysmap;           /**< system map file for domain's running kernel */
+
+    addr_t ntoskrnl; /**< base phys address for ntoskrnl image */
 
     addr_t ntoskrnl_va; /**< virtual address for ntoskrnl image */
 
@@ -66,10 +69,18 @@ char*
 windows_rva_to_export(vmi_instance_t vmi, addr_t rva, addr_t base_vaddr,
         vmi_pid_t pid);
 
+status_t windows_teardown(vmi_instance_t vmi);
+
+status_t windows_system_map_symbol_to_address(
+    vmi_instance_t vmi,
+    const char *symbol,
+    const char *subsymbol,
+    const addr_t kernel_base_vaddr,
+    addr_t *address);
+
 typedef int (*check_magic_func)(uint32_t);
 int find_pname_offset(vmi_instance_t vmi, check_magic_func check);
 addr_t windows_find_eprocess_list_pid(vmi_instance_t vmi, vmi_pid_t pid);
 addr_t windows_find_eprocess_list_pgd(vmi_instance_t vmi, addr_t pgd);
-
 
 #endif /* OS_WINDOWS_H_ */

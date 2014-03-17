@@ -385,12 +385,17 @@ void windows_read_config_ghashtable_entries(char* key, gpointer value,
         goto _done;
     }
 
-    if (strcnmp(key, "win_kdbg_instance", CONFIG_STR_LENGTH) == 0) {
-        windows_instance->kdbg = (KDDEBUGGER_DATA64 *)value;
+    if (strncmp(key, "win_kdbg_instance", CONFIG_STR_LENGTH) == 0) {
+        windows_instance->kdbg = g_memdup(value, sizeof(KDDEBUGGER_DATA64));
         goto _done;
     }
 
     if (strncmp(key, "ostype", CONFIG_STR_LENGTH) == 0 || strncmp(key, "os_type", CONFIG_STR_LENGTH) == 0) {
+        goto _done;
+    }
+
+    if (strncmp(key, "sysmap", CONFIG_STR_LENGTH) == 0) {
+        windows_instance->sysmap = (char *)value;
         goto _done;
     }
 
@@ -442,7 +447,7 @@ windows_init(
     os_interface->os_ksym2v = windows_kernel_symbol_to_address;
     os_interface->os_usym2rva = windows_export_to_rva;
     os_interface->os_rva2sym = windows_rva_to_export;
-    os_interface->os_teardown = NULL;
+    os_interface->os_teardown = windows_teardown;
 
     vmi->os_interface = os_interface;
 
@@ -488,7 +493,23 @@ windows_init(
     return status;
 
 error_exit:
-    free(vmi->os_interface);
-    vmi->os_interface = NULL;
+    windows_teardown(vmi);
     return VMI_FAILURE;
 }
+
+status_t windows_teardown(vmi_instance_t vmi) {
+    windows_instance_t windows = vmi->os_data;
+
+    if (!windows) {
+        return VMI_SUCCESS;
+    }
+
+    g_free(windows->sysmap);
+    g_free(windows->kdbg);
+
+    free(vmi->os_data);
+    vmi->os_data = NULL;
+
+    return VMI_SUCCESS;
+}
+

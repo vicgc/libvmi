@@ -31,6 +31,32 @@
 #define _GNU_SOURCE
 #include <string.h>
 
+// See http://en.wikipedia.org/wiki/Windows_NT
+static inline
+win_ver_t builds(uint16_t ntbuildnumber)
+{
+    switch(ntbuildnumber) {
+        case 2195:
+            return VMI_OS_WINDOWS_2000;
+        case 2600:
+        case 3790:
+            return VMI_OS_WINDOWS_XP;
+        case 6000:
+        case 6001:
+        case 6002:
+            return VMI_OS_WINDOWS_VISTA;
+        case 7600:
+        case 7601:
+            return VMI_OS_WINDOWS_7;
+        case 9200:
+        case 9600:
+            return VMI_OS_WINDOWS_8;
+        default:
+            break;
+    }
+    return VMI_OS_WINDOWS_UNKNOWN;
+};
+
 static status_t
 kdbg_symbol_resolve(
     vmi_instance_t vmi,
@@ -584,8 +610,6 @@ find_windows_version(
     addr_t kdbg)
 {
 
-    dbprint(VMI_DEBUG_MISC, "--Find Windows version from KDBG @ 0x%lx\n", kdbg);
-
     windows_instance_t windows = NULL;
 
     if (vmi->os_data == NULL) {
@@ -601,7 +625,7 @@ find_windows_version(
     }
 
     win_ver_t version = VMI_OS_WINDOWS_UNKNOWN;
-    vmi_read_16_pa(vmi, kdbg + 0x14, (uint16_t *)&version);
+    vmi_read_16_pa(vmi, kdbg + 0x14, (uint16_t*)&version);
 
     // Check if it's a version we know about.
     // The known KDBG magic values are defined in win_ver_t
@@ -1067,6 +1091,74 @@ init_kdbg(
         if(!windows->kdbg_va) {
             windows->kdbg_va = windows->ntoskrnl_va + windows->kdbg_offset;
         }
+        ret = VMI_SUCCESS;
+        goto exit;
+    } else
+    if(windows->kdbg) {
+        windows->ntoskrnl = vmi_translate_kv2p(vmi, windows->kdbg->KernBase);
+        windows->ntoskrnl_va = windows->kdbg->KernBase;
+        ret = VMI_SUCCESS;
+        goto exit;
+    } else
+    if(windows->sysmap) {
+
+        windows->kdbg = g_malloc0(sizeof(KDDEBUGGER_DATA64));
+
+        reg_t kpcr = 0;
+        addr_t kpcr_rva = 0, ntbuildnumber_rva = 0;
+
+        windows_system_map_symbol_to_address(vmi, "_KiInitialPCR", NULL, 0, &kpcr_rva);
+        windows_system_map_symbol_to_address(vmi, "_NtBuildNumber", NULL, 0, &ntbuildnumber_rva);
+        windows_system_map_symbol_to_address(vmi, "_PsLoadedModuleList", NULL, 0, &windows->kdbg->PsLoadedModuleList);
+        windows_system_map_symbol_to_address(vmi, "_PsActiveProcessHead", NULL, 0, &windows->kdbg->PsActiveProcessHead);
+
+        // Let's first try to get the kernbase from the KPCR (FS/GS registers)
+        if(vmi->page_mode == VMI_PM_IA32E) {
+            if(VMI_SUCCESS == driver_get_vcpureg(vmi, &kpcr, GS_BASE, 0)) {
+                windows->ntoskrnl_va = kpcr-kpcr_rva;
+                windows->ntoskrnl = vmi_translate_kv2p(vmi, windows->ntoskrnl_va);
+            }
+        } else if(vmi->page_mode == VMI_PM_LEGACY || vmi->page_mode == VMI_PM_PAE) {
+            if(VMI_SUCCESS == driver_get_vcpureg(vmi, &kpcr, FS_BASE, 0)) {
+                windows->ntoskrnl_va = kpcr-kpcr_rva;
+                windows->ntoskrnl = vmi_translate_kv2p(vmi, windows->ntoskrnl_va);
+            }
+        }
+
+        // This could happen if we are in file mode
+        if(!windows->ntoskrnl) {
+            windows->ntoskrnl = get_ntoskrnl_base(vmi, 0);
+
+            // get KdVersionBlock/"_DBGKD_GET_VERSION64"->KernBase
+            addr_t kdvb = 0, kernbase_offset = 0;
+            windows_system_map_symbol_to_address(vmi, "_KdVersionBlock", NULL, 0, &kdvb);
+            windows_system_map_symbol_to_address(vmi, "_DBGKD_GET_VERSION64", "KernBase", 0, &kernbase_offset);
+
+            if(kdvb && kernbase_offset) {
+                vmi_read_addr_pa(vmi, windows->ntoskrnl + kdvb + kernbase_offset, &windows->ntoskrnl_va);
+            } else {
+                goto exit;
+            }
+        }
+
+        uint16_t ntbuildnumber = 0;
+        vmi_read_16_pa(vmi, windows->ntoskrnl + ntbuildnumber_rva, &ntbuildnumber);
+
+        win_ver_t version = builds(ntbuildnumber);
+        if(version == VMI_OS_WINDOWS_UNKNOWN) {
+            goto exit;
+        }
+
+        windows->kdbg->Header.Size = version;
+        windows->kdbg->KernBase = windows->ntoskrnl_va;
+        windows->kdbg->PsLoadedModuleList += windows->kdbg->KernBase;
+        windows->kdbg->PsActiveProcessHead += windows->kdbg->KernBase;
+
+        windows_system_map_symbol_to_address(vmi, "_EPROCESS", "ActiveProcessLinks", 0, &windows->tasks_offset);
+        windows_system_map_symbol_to_address(vmi, "_KPROCESS", "DirectoryTableBase", 0, &windows->pdbase_offset);
+        windows_system_map_symbol_to_address(vmi, "_EPROCESS", "UniqueProcessId", 0, &windows->pid_offset);
+        windows_system_map_symbol_to_address(vmi, "_EPROCESS", "ImageFileName", 0, &windows->pname_offset);
+
         ret = VMI_SUCCESS;
         goto exit;
     }
